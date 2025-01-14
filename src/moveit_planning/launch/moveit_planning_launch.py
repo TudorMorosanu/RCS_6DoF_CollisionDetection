@@ -16,12 +16,12 @@ def generate_launch_description():
             package='keyboard_control',
             executable='ur5_keyboard_control.py',
             name='ur5_keyboard_control',
-            output='screen'
+            output='screen',
         ),
         Node(
             package='keyboard_control',
             executable='read_twist_topic.py',
             name='read_twist_topic',
-            output='screen'
+            output='screen',
         ),
     ])

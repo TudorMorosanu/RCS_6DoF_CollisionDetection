@@ -9,12 +9,12 @@ class UR5KeyboardControl(Node):
     def __init__(self):
         super().__init__('ur5_keyboard_control')
         self.publisher_ = self.create_publisher(Twist, '/ur5_control', 10)
-        self.increment_value = 0.1
+        self.increment_value = 0.05
         self.running = True
         self.listener_thread = threading.Thread(target=self.keyboard_listener)
         self.get_logger().info("Starting Thread...")
         self.listener_thread.start()
-        self.get_logger().info("Keyboard control started. Use 'w', 's', 'a', 'd', 'q', 'e' to move the robot. Press 'esc' to quit.")
+        self.get_logger().info("Keyboard control started. Use 'w', 's', 'a', 'd', 'q', 'e' to move the robot. Press 'x' to quit.")
 
     def on_press(self, key):
         
