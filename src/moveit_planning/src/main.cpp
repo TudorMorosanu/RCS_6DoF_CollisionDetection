@@ -9,15 +9,10 @@ int main(int argc, char** argv)
     
     auto planner = std::make_shared<MoveitPlanner>();
 
-    // static const std::string PLANNING_GROUP = "ur_manipulator";
-    // auto move_group = moveit::planning_interface::MoveGroupInterface(planner, "ur_manipulator");
-
     planner->setMoveGroup();
-    // planner->getInitialPose();
 
     rclcpp::spin(planner);
 
-    // Shutdown ROS
     rclcpp::shutdown();
     return 0;
 }
