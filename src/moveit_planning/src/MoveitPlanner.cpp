@@ -39,7 +39,7 @@ void MoveitPlanner::getCurrentPose()
 
 void MoveitPlanner::performMotion(const geometry_msgs::msg::Twist::SharedPtr msg)
 {
-    double eef_step = 0.001;  // 1 cm spacing between waypoints
+    double eef_step = 0.05;  // 1 cm spacing between waypoints
     double jump_threshold = 0.0; // set to 0 to disable the jump distance check (not recommended)
     moveit_msgs::msg::RobotTrajectory trajectory;
     std::vector<geometry_msgs::msg::Pose> waypoints;
@@ -49,7 +49,7 @@ void MoveitPlanner::performMotion(const geometry_msgs::msg::Twist::SharedPtr msg
 
     this->getCurrentPose();
 
-    geometry_msgs::msg::Pose target_pose;
+    geometry_msgs::msg::Pose target_pose = this->current_pose.pose;
     
     //target_pose.orientation.w = 1.0;
     // target_pose.position.x = this->last_target_pose.position.x + msg->linear.x;
@@ -77,7 +77,7 @@ void MoveitPlanner::performMotion(const geometry_msgs::msg::Twist::SharedPtr msg
         double fraction = this->move_group_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
 
         RCLCPP_INFO(this->get_logger(), "Target fraction: %f", fraction);
-        if (fraction > 0.9) { // Check if a sufficient part of the path was planned
+        if (fraction > 0.0) { // Check if a sufficient part of the path was planned
             moveit::planning_interface::MoveGroupInterface::Plan my_plan;
             my_plan.trajectory_ = trajectory;
             this->move_group_->execute(my_plan);
