@@ -49,7 +49,7 @@ void MoveitPlanner::performMotion(const geometry_msgs::msg::Twist::SharedPtr msg
 
     this->getCurrentPose();
 
-    geometry_msgs::msg::Pose target_pose = this->current_pose.pose;
+    geometry_msgs::msg::Pose target_pose;
     
     //target_pose.orientation.w = 1.0;
     // target_pose.position.x = this->last_target_pose.position.x + msg->linear.x;
