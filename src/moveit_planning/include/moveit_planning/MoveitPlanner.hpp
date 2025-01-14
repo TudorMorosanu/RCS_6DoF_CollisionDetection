@@ -26,7 +26,7 @@ private:
 
     void timer_callback()
     {
-        //getCurrentPose();
+        getCurrentPose();
         performMotion();
         RCLCPP_INFO(this->get_logger(), "Performing motion");
     }

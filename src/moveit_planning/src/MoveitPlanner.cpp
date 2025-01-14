@@ -38,8 +38,11 @@ MoveitPlanner::MoveitPlanner() : Node("moveit_planner")
 void MoveitPlanner::setMoveGroup()
 {
     this->move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(shared_from_this(), "ur_manipulator");
-    std::string planner_id = "RRTConnectkConfigDefault";
-    this->move_group_->setPlannerId(planner_id);
+    // std::string planner_id = "RRTkConfigDefault";
+    // this->move_group_->setPlannerId(planner_id);
+
+    RCLCPP_INFO(this->get_logger(), "Node initialized successfully!");
+
 }
 
 void MoveitPlanner::getCurrentPose()
@@ -55,8 +58,6 @@ void MoveitPlanner::getCurrentPose()
                 this->current_pose.pose.orientation.y,
                 this->current_pose.pose.orientation.z,
                 this->current_pose.pose.orientation.w);
-
-    RCLCPP_INFO(this->get_logger(), "Node initialized successfully!");
 }
 
 void MoveitPlanner::performMotion()
@@ -69,6 +70,8 @@ void MoveitPlanner::performMotion()
 
     // Define target pose
     geometry_msgs::msg::Pose target_pose;
+    std::vector<geometry_msgs::msg::Pose> waypoints;
+    
     //target_pose.orientation.w = 1.0;
     // target_pose.position.x = this->current_pose.pose.position.x + 0.1;  // Desired X coordinate
     // target_pose.position.y = this->current_pose.pose.position.y + 0.1;  // Desired Y coordinate
@@ -88,27 +91,47 @@ void MoveitPlanner::performMotion()
                 this->circle_trajectory[point_num].y, this->circle_trajectory[point_num].z, point_num);
     point_num = (point_num + 1) % 10;
 
+    waypoints.push_back(target_pose);
+
     // bool targets_equal = target_pose.position.x == this->last_target_pose.position.x &&
     //                      target_pose.position.y == this->last_target_pose.position.y &&
     //                      target_pose.position.z == this->last_target_pose.position.z &&
     //                      target_pose.orientation.w == this->last_target_pose.orientation.w;
 
+    double eef_step = 0.001;  // 1 cm spacing between waypoints
+    double jump_threshold = 0.0; // set to 0 to disable the jump distance check (not recommended)
+    moveit_msgs::msg::RobotTrajectory trajectory;
+
+    double fraction = this->move_group_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
+    //ROS_INFO_NAMED("tutorial", "Visualizing plan (Cartesian path) (%.2f%% acheived)", fraction * 100.0);
+
     if(true)
     {
-        this->move_group_->setPoseTarget(target_pose);
-
-        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-        bool success = (this->move_group_->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
-
-        if (success) {
-            RCLCPP_INFO(this->get_logger(), "Plan successful, executing...");
+        
+        if (fraction > 0.9) { // Check if a sufficient part of the path was planned
+            moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+            my_plan.trajectory_ = trajectory;
             this->move_group_->execute(my_plan);
-            this->last_target_pose.position.x = target_pose.position.x;
-            this->last_target_pose.position.y = target_pose.position.y;
-            this->last_target_pose.position.z = target_pose.position.z;
-            this->last_target_pose.orientation.w = target_pose.orientation.w;
-        } else {
+        }
+        else
+        {
             RCLCPP_ERROR(this->get_logger(), "Planning failed!");
         }
+
+        // this->move_group_->setPoseTarget(target_pose);
+
+        // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+        // bool success = (this->move_group_->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
+
+        // if (success) {
+        //     RCLCPP_INFO(this->get_logger(), "Plan successful, executing...");
+        //     this->move_group_->execute(my_plan);
+        //     this->last_target_pose.position.x = target_pose.position.x;
+        //     this->last_target_pose.position.y = target_pose.position.y;
+        //     this->last_target_pose.position.z = target_pose.position.z;
+        //     this->last_target_pose.orientation.w = target_pose.orientation.w;
+        // } else {
+        //     RCLCPP_ERROR(this->get_logger(), "Planning failed!");
+        // }
     }
 }
