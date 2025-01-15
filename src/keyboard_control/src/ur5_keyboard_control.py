@@ -9,7 +9,7 @@ class UR5KeyboardControl(Node):
     def __init__(self):
         super().__init__('ur5_keyboard_control')
         self.publisher_ = self.create_publisher(Twist, '/ur5_control', 10)
-        self.increment_value = 0.05
+        self.increment_value = 0.1
         self.running = True
         self.listener_thread = threading.Thread(target=self.keyboard_listener)
         self.get_logger().info("Starting Thread...")
@@ -52,9 +52,6 @@ class UR5KeyboardControl(Node):
             self.publisher_.publish(twist_msg)
         except Exception as e:
             self.get_logger().error(f"Exception occurred: {e}")
-            # Log the full traceback for debugging
-            traceback_str = ''.join(traceback.format_exception(None, e, e.__traceback__))
-            self.get_logger().error(f"Traceback: {traceback_str}")
 
 
     def keyboard_listener(self):
